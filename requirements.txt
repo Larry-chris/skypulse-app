@@ -1,0 +1,4 @@
+streamlit
+atproto
+pandas
+networkx
