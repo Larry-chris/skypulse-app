@@ -23,7 +23,7 @@ def connect_user(handle, password):
 
 def run_ghost_buster(client):
     """
-    Algorithme principal : Analyse Followers OU Following avec Liens Cliquables.
+    Algorithme principal : Analyse Followers OU Following avec Tableau Interactif Pro.
     """
     st.subheader("👻 Ghost Buster (Détection d'inactifs)")
     
@@ -53,7 +53,7 @@ def run_ghost_buster(client):
             
             with st.spinner("Récupération de la liste..."):
                 if api_method == "get_followers":
-                    # Limite à 30 pour la rapidité
+                    # Limite à 30 pour la rapidité de la démo
                     response = client.app.bsky.graph.get_followers(params={'actor': my_did, 'limit': 30})
                     profiles = response.followers
                 else:
@@ -115,13 +115,11 @@ def run_ghost_buster(client):
                     status_label = "❓ Privé/Erreur"
                     days_inactive = -1
 
-                # CRÉATION DU LIEN HTML CLIQUABLE
-                profile_url = f"https://bsky.app/profile/{handle}"
-                # On met le lien HTML directement dans la donnée
-                link_html = f'<a href="{profile_url}" target="_blank" style="text-decoration:none; color:#007bff; font-weight:bold;">@{handle}</a>'
+                # --- ICI : On stocke l'URL complète, pas du HTML ---
+                full_url = f"https://bsky.app/profile/{handle}"
 
                 ghost_data.append({
-                    "Pseudo": link_html,
+                    "Pseudo": full_url, # L'URL sera transformée en lien propre par Streamlit
                     "Dernier Post": formatted_date,
                     "Jours Inactif": days_inactive if days_inactive != 9999 else "Jamais",
                     "Statut": status_label,
@@ -152,26 +150,31 @@ def run_ghost_buster(client):
                 st.divider()
 
                 st.write(f"### Résultats pour : {scan_type}")
-                st.caption("💡 Cliquez sur un pseudo en bleu pour ouvrir le profil et agir.")
+                st.caption("💡 Cliquez sur un pseudo pour ouvrir le profil BlueSky.")
 
-                # PRÉPARATION DU TABLEAU HTML (Pour les liens)
+                # Fonction de couleur (Rouge pour les inactifs)
+                def highlight_ghosts(row):
+                    if 'Inactif' in str(row['Statut']):
+                        return ['background-color: #ffe6e6; color: #b30000'] * len(row)
+                    return [''] * len(row)
+
+                # Préparation des données (on cache la colonne technique)
                 display_df = df.drop(columns=['is_ghost'])
                 
-                # Conversion en HTML sans échapper les tags (pour que les liens marchent)
-                html = display_df.to_html(escape=False, index=False)
-                
-                # Un peu de CSS pour que le tableau soit joli
-                st.markdown(
-                    f"""
-                    <style>
-                    table {{ width: 100%; border-collapse: collapse; }}
-                    th {{ background-color: #f0f2f6; padding: 10px; text-align: left; }}
-                    td {{ padding: 8px; border-bottom: 1px solid #ddd; }}
-                    tr:hover {{ background-color: #f5f5f5; }}
-                    </style>
-                    {html}
-                    """,
-                    unsafe_allow_html=True
+                # --- AFFICHAGE TABLEAU MODERNE ---
+                st.dataframe(
+                    display_df.style.apply(highlight_ghosts, axis=1),
+                    use_container_width=True,
+                    column_config={
+                        "Pseudo": st.column_config.LinkColumn(
+                            "Pseudo (Lien)",
+                            display_text="https://bsky\\.app/profile/(.*)" # Regex qui extrait le pseudo de l'URL
+                        ),
+                        "Jours Inactif": st.column_config.NumberColumn(
+                            "Jours Inactif",
+                            format="%d j"
+                        )
+                    }
                 )
                 
                 st.success("Analyse terminée !")
@@ -245,7 +248,7 @@ else:
     st.image("https://media.giphy.com/media/l0HlHFRbmaZtBRhXG/giphy.gif")
     st.info("👈 Connectez-vous dans le menu à gauche pour commencer.")
 
-# --- PIED DE PAGE (FOOTER) ---
+# --- 4. PIED DE PAGE (FOOTER) ---
 st.markdown("---")
 col_f1, col_f2 = st.columns(2)
 
@@ -254,7 +257,6 @@ with col_f1:
     st.caption("Crafted in Benin 🇧🇯")
 
 with col_f2:
-    # Remplace par ton vrai lien BlueSky
     st.markdown(
         """
         <div style="text-align: right;">
