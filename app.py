@@ -244,3 +244,24 @@ else:
     st.write("Détectez les comptes inactifs et nettoyez votre audience.")
     st.image("https://media.giphy.com/media/l0HlHFRbmaZtBRhXG/giphy.gif")
     st.info("👈 Connectez-vous dans le menu à gauche pour commencer.")
+
+# --- PIED DE PAGE (FOOTER) ---
+st.markdown("---")
+col_f1, col_f2 = st.columns(2)
+
+with col_f1:
+    st.caption("© 2025 **L • Vertical Studio**")
+    st.caption("Crafted in Benin 🇧🇯")
+
+with col_f2:
+    # Remplace par ton vrai lien BlueSky
+    st.markdown(
+        """
+        <div style="text-align: right;">
+            <a href="https://bsky.app/profile/l-studio.bsky.social" target="_blank" style="text-decoration: none; color: grey;">
+                Besoin d'aide ? Contactez le Fondateur ↗
+            </a>
+        </div>
+        """, 
+        unsafe_allow_html=True
+    )
