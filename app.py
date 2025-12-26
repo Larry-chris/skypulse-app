@@ -255,7 +255,7 @@ col_f1, col_f2 = st.columns(2)
 with col_f1:
     st.caption("© 2025 **L • Vertical Studio**")
     st.caption("Crafted in Benin 🇧🇯")
-    st.markdown("[Privacy & Terms](TON_LIEN_NOTION_ICI)", unsafe_allow_html=True)
+    st.markdown("[Privacy & Terms](https://silicon-worm-596.notion.site/L-Legal-Center-2d50beede63a8070b6f5ec0bcce6e016?source=copy_link)", unsafe_allow_html=True)
 with col_f2:
     st.markdown(
         """
@@ -267,3 +267,4 @@ with col_f2:
         """, 
         unsafe_allow_html=True
     )
+
