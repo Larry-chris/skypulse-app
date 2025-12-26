@@ -248,6 +248,24 @@ else:
     st.image("https://media.giphy.com/media/l0HlHFRbmaZtBRhXG/giphy.gif")
     st.info("👈 Connectez-vous dans le menu à gauche pour commencer.")
 
+
+# --- SECTION OFFRE PREMIUM (Pour validation Lemon Squeezy) ---
+st.markdown("---")
+st.subheader("💎 Version Premium (Bientôt disponible)")
+
+col_p1, col_p2 = st.columns([2, 1])
+
+with col_p1:
+    st.write("**Débloquez le rapport complet :**")
+    st.write("✅ Liste complète des fantômes (+ de 20)")
+    st.write("✅ Liens directs pour nettoyage rapide")
+    st.write("✅ Support prioritaire")
+
+with col_p2:
+    st.metric(label="Prix Unique", value="$4.99")
+    st.button("Acheter la version complète", disabled=True, help="L'achat sera activé prochainement")
+
+
 # --- 4. PIED DE PAGE (FOOTER) ---
 st.markdown("---")
 col_f1, col_f2 = st.columns(2)
@@ -267,4 +285,3 @@ with col_f2:
         """, 
         unsafe_allow_html=True
     )
-
