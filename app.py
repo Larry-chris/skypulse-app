@@ -255,7 +255,7 @@ col_f1, col_f2 = st.columns(2)
 with col_f1:
     st.caption("© 2025 **L • Vertical Studio**")
     st.caption("Crafted in Benin 🇧🇯")
-
+    st.markdown("[Privacy & Terms](TON_LIEN_NOTION_ICI)", unsafe_allow_html=True)
 with col_f2:
     st.markdown(
         """
