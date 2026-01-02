@@ -23,7 +23,7 @@ def connect_user(handle, password):
 
 def run_ghost_buster(client):
     """
-    Main Algorithm: Analyze Followers OR Following with Pro Interactive Table.
+    Main Algorithm: Demo Mode (Hides results to create desire).
     """
     st.subheader("👻 Ghost Buster (Inactive Detector)")
     
@@ -53,11 +53,11 @@ def run_ghost_buster(client):
             
             with st.spinner("Fetching profiles..."):
                 if api_method == "get_followers":
-                    # Limited to 30 for speed in Beta
-                    response = client.app.bsky.graph.get_followers(params={'actor': my_did, 'limit': 30})
+                    # Limit set to 50 for the demo to be fast but meaningful
+                    response = client.app.bsky.graph.get_followers(params={'actor': my_did, 'limit': 50})
                     profiles = response.followers
                 else:
-                    response = client.app.bsky.graph.get_follows(params={'actor': my_did, 'limit': 30})
+                    response = client.app.bsky.graph.get_follows(params={'actor': my_did, 'limit': 50})
                     profiles = response.follows
             
             if not profiles:
@@ -119,7 +119,7 @@ def run_ghost_buster(client):
                 full_url = f"https://bsky.app/profile/{handle}"
 
                 ghost_data.append({
-                    "Handle": full_url, # URL to be converted by Streamlit
+                    "Handle": full_url, 
                     "Last Post": formatted_date,
                     "Days Inactive": days_inactive if days_inactive != 9999 else "Never",
                     "Status": status_label,
@@ -128,18 +128,19 @@ def run_ghost_buster(client):
                 
                 progress_bar.progress((i + 1) / total_profiles)
 
-            # C. Display Results
+            # C. Results Processing
             status_text.empty()
             progress_bar.empty()
 
             df = pd.DataFrame(ghost_data)
             
             if not df.empty:
-                # KPIs
+                # KPIs Calculation
                 nb_analyzed = len(df)
                 nb_ghosts = len(df[df['is_ghost'] == True])
                 inactivity_rate = (nb_ghosts / nb_analyzed) * 100 if nb_analyzed > 0 else 0
 
+                # Display KPIs
                 st.divider()
                 kpi1, kpi2, kpi3 = st.columns(3)
                 kpi1.metric("Scanned", nb_analyzed)
@@ -149,7 +150,24 @@ def run_ghost_buster(client):
                 kpi3.metric("Inactivity Rate", f"{inactivity_rate:.1f} %", delta=delta_msg, delta_color="inverse")
                 st.divider()
 
-                st.write(f"### Results for: {scan_type}")
+                # --- STRATEGY: DEMO MODE ---
+                # Separate ghosts from active users
+                df_ghosts = df[df['is_ghost'] == True]
+                df_active = df[df['is_ghost'] == False]
+                
+                # We only show the top 3 ghosts
+                preview_ghosts = df_ghosts.head(3)
+                
+                # Combine active users + 3 ghosts for the table display
+                display_df = pd.concat([preview_ghosts, df_active]).drop(columns=['is_ghost'])
+                
+                # TEASER MESSAGE
+                if len(df_ghosts) > 3:
+                    hidden_count = len(df_ghosts) - 3
+                    st.warning(f"⚠️ **Demo Mode:** Showing 3 ghosts out of {len(df_ghosts)} detected.")
+                    st.info(f"🔒 **{hidden_count} other ghosts** are hidden. Full access & payments coming **Late January** after my Med School exams! 🩺💊")
+                
+                st.write(f"### Results ({scan_type})")
                 st.caption("💡 Click on a handle to open the profile on BlueSky.")
 
                 # Highlighting logic
@@ -158,10 +176,7 @@ def run_ghost_buster(client):
                         return ['background-color: #ffe6e6; color: #b30000'] * len(row)
                     return [''] * len(row)
 
-                # Prepare data
-                display_df = df.drop(columns=['is_ghost'])
-                
-                # --- PRO TABLE DISPLAY ---
+                # Display Table
                 st.dataframe(
                     display_df.style.apply(highlight_ghosts, axis=1),
                     use_container_width=True,
@@ -177,7 +192,12 @@ def run_ghost_buster(client):
                     }
                 )
                 
-                st.success("Scan complete!")
+                # LOCKED BUTTON
+                if len(df_ghosts) > 3:
+                    st.markdown("---")
+                    st.button(f"🔓 Unlock all {len(df_ghosts)} ghosts (Coming Jan 24)", disabled=True)
+                else:
+                    st.success("Scan complete! No hidden ghosts found in this batch.")
 
         except Exception as e:
             st.error(f"Technical error: {e}")
@@ -244,25 +264,25 @@ if st.session_state.client_connected:
 else:
     # Guest Mode (Landing)
     st.markdown("### The Analytics Tool for BlueSky Creators.")
-    st.write("Detect inactive accounts and clean your audience in one click.")
+    st.write("Detect inactive accounts and clean your audience.")
     st.image("https://media.giphy.com/media/l0HlHFRbmaZtBRhXG/giphy.gif")
     st.info("👈 Login in the sidebar to start scanning.")
 
-# --- PREMIUM SECTION (For Lemon Squeezy Validation) ---
+# --- PREMIUM SECTION (Teasing) ---
 st.markdown("---")
-st.subheader("💎 Premium Version (Coming Soon)")
+st.subheader("💎 Premium Version (Paused)")
 
 col_p1, col_p2 = st.columns([2, 1])
 
 with col_p1:
-    st.write("**Unlock the Full Report:**")
-    st.write("✅ Full Ghost List (Unlimited)")
-    st.write("✅ Direct Cleanup Links")
+    st.write("**Full Access includes:**")
+    st.write("✅ Unlimited Ghost Detection")
+    st.write("✅ One-click profile access")
     st.write("✅ Priority Support")
 
 with col_p2:
-    st.metric(label="One-Time Fee", value="$4.99")
-    st.button("Buy Full Access", disabled=True, help="Purchases opening soon")
+    st.metric(label="Status", value="Study Break 📚")
+    st.button("Back on Jan 24", disabled=True, help="Dev is taking exams!")
 
 # --- 4. FOOTER ---
 st.markdown("---")
@@ -271,8 +291,8 @@ col_f1, col_f2 = st.columns(2)
 with col_f1:
     st.caption("© 2025 **L • Vertical Studio**")
     st.caption("Crafted in Benin 🇧🇯")
-    # Replace '#' with your Notion link when ready
-    st.markdown("[Privacy & Terms](https://silicon-worm-596.notion.site/L-Legal-Center-2d50beede63a8070b6f5ec0bcce6e016?source=copy_link)", unsafe_allow_html=True) 
+    # Replace '#' with your Notion link if you have it
+    st.markdown("[Privacy & Terms](#)", unsafe_allow_html=True) 
 
 with col_f2:
     st.markdown(
